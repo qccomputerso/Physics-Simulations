@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>3-Body problem</title>
+		<link rel="stylesheet" type="text/css" href="style.css"/>
+		<script defer src="3-body.js"></script>
+	</head>
+	<body>
+		<img id="pausebutton" onclick="paused = !paused; this.src = 'paused' + paused + '.png'" src="pausedfalse.png">
+		<img id="ffbutton" onclick="Array(1000).fill(0).forEach(calculate)" src="ff.png">
+		<canvas id="c"></canvas>
+	</body>
+</html>
