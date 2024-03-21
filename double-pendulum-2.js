@@ -226,28 +226,63 @@ function Cos(expr, num = 1) { return new ExprCos(expr, num); }
 const c = document.getElementById("c"), ctx = c.getContext("2d");
 const initial = [Math.PI / 2 - 0.1, Math.PI / 2];
 const dt = 0.005;
-const Methods = {
-	Euler: {
-		color: "#C13F3F",
-		a: [...initial],
-		da: [0, 0]
-	},
-	Leapfrog: {
-		color: "#EEEE5F",
-		a: [...initial],
-		da: [0, 0]
-	},
-	"Third Order": {
+const Methods = [
+	{
 		color: "#3EBCBC",
-		a: [...initial],
+		a: [Math.PI / 2 - 0.01, Math.PI / 2],
 		da: [0, 0]
 	},
-	//Exact: {
-	//	color: "#3FBF47",
-	//	a: [...initial],
-	//	da: [0, 0]
-	//},
-}
+	{
+		color: "#3EBCBC",
+		a: [Math.PI / 2 - 0.009, Math.PI / 2],
+		da: [0, 0]
+	},
+	{
+		color: "#3EBCBC",
+		a: [Math.PI / 2 - 0.008, Math.PI / 2],
+		da: [0, 0]
+	},
+	{
+		color: "#3EBCBC",
+		a: [Math.PI / 2 - 0.007, Math.PI / 2],
+		da: [0, 0]
+	},
+	{
+		color: "#3EBCBC",
+		a: [Math.PI / 2 - 0.006, Math.PI / 2],
+		da: [0, 0]
+	},
+	{
+		color: "#3EBCBC",
+		a: [Math.PI / 2 - 0.005, Math.PI / 2],
+		da: [0, 0]
+	},
+	{
+		color: "#3EBCBC",
+		a: [Math.PI / 2 - 0.004, Math.PI / 2],
+		da: [0, 0]
+	},
+	{
+		color: "#3EBCBC",
+		a: [Math.PI / 2 - 0.003, Math.PI / 2],
+		da: [0, 0]
+	},
+	{
+		color: "#3EBCBC",
+		a: [Math.PI / 2 - 0.002, Math.PI / 2],
+		da: [0, 0]
+	},
+	{
+		color: "#3EBCBC",
+		a: [Math.PI / 2 - 0.001, Math.PI / 2],
+		da: [0, 0]
+	},
+	{
+		color: "#3EBCBC",
+		a: [Math.PI / 2 - 0.0, Math.PI / 2],
+		da: [0, 0]
+	},
+];
 const k = 4;
 const A1 = new Var("a1");
 const dA1 = A1.dt();
@@ -286,40 +321,22 @@ let paused = false;
 
 function calculate() {
 	t += dt;
-	let a, da, acc;
-	const E = Methods.Euler;
-	a = [...E.a];
-	da = [...E.da];
-	E.a[0] += dt * da[0];
-	E.a[1] += dt * da[1];
-	acc = d2a(a, da);
-	E.da[0] += acc[0] * dt;
-	E.da[1] += acc[1] * dt;
-	const L = Methods.Leapfrog;
-	a = [...L.a];
-	da = [...L.da];
-	acc = d2a(a, da);
-	L.a[0] += dt * (da[0] + 0.5 * dt * acc[0]);
-	L.a[1] += dt * (da[1] + 0.5 * dt * acc[1]);
-	for (let i = 0; i < 100; i++) {
-		let newAccel = d2a(L.a, L.da);
-		L.da[0] = da[0] + (acc[0] + newAccel[0]) * 0.5 * dt;
-		L.da[1] = da[1] + (acc[1] + newAccel[1]) * 0.5 * dt;
-	}
-	const T = Methods["Third Order"];
-	a = [...T.a];
-	da = [...T.da];
-	acc = d2a(a, da);
-	jrk = d3a(a, da);
-	jnc = d4a(a, da);
-	let newJnc = jnc;
-	for (let i = 0; i > -1; i++) {
-		T.a[0] = a[0] + dt * (da[0] + dt * 0.5 * (acc[0] + dt / 3 * (jrk[0] + (jnc[0] * 0.2 + newJnc[0] * 0.05) * dt)));
-		T.a[1] = a[1] + dt * (da[1] + dt * 0.5 * (acc[1] + dt / 3 * (jrk[1] + (jnc[1] * 0.2 + newJnc[1] * 0.05) * dt)));
-		T.da[0] = da[0] + dt * (acc[0] + dt * 0.5 * (jrk[0] + (jnc[0] / 4 + newJnc[0] / 12) * dt));
-		T.da[1] = da[1] + dt * (acc[1] + dt * 0.5 * (jrk[1] + (jnc[1] / 4 + newJnc[1] / 12) * dt));
-		if (i == 6) break;
-		newJnc = d4a(T.a, T.da);
+	for (let i = 0; i <= 10; i++) {
+		const T = Methods[i];
+		a = [...T.a];
+		da = [...T.da];
+		acc = d2a(a, da);
+		jrk = d3a(a, da);
+		jnc = d4a(a, da);
+		let newJnc = jnc;
+		for (let i = 0; i > -1; i++) {
+			T.a[0] = a[0] + dt * (da[0] + dt * 0.5 * (acc[0] + dt / 3 * (jrk[0] + (jnc[0] * 0.2 + newJnc[0] * 0.05) * dt)));
+			T.a[1] = a[1] + dt * (da[1] + dt * 0.5 * (acc[1] + dt / 3 * (jrk[1] + (jnc[1] * 0.2 + newJnc[1] * 0.05) * dt)));
+			T.da[0] = da[0] + dt * (acc[0] + dt * 0.5 * (jrk[0] + (jnc[0] / 4 + newJnc[0] / 12) * dt));
+			T.da[1] = da[1] + dt * (acc[1] + dt * 0.5 * (jrk[1] + (jnc[1] / 4 + newJnc[1] / 12) * dt));
+			if (i == 4) break;
+			newJnc = d4a(T.a, T.da);
+		}
 	}
 	//Methods["Third Order"].y[1] += dt * (d2y(oldCT) + dt * 0.5 * (d3y(Methods["Third Order"].y[1]) + d2y(d2y(oldCT + Methods["Third Order"].y[0])) * dt / 6));
 }
@@ -356,7 +373,7 @@ function render() {
 			+ (Math.sin(m.a[0]) * m.da[0] + Math.sin(m.a[1]) * m.da[1]) ** 2
 			+ (Math.cos(m.a[0]) * m.da[0]) ** 2 + (Math.sin(m.a[0]) * m.da[0]) ** 2);
 		const GPE = 10 - g * (y + y1);
-		ctx.fillText(((KE + GPE) / 1000 + 31.937).toFixed(3) + "J energy", innerWidth / 2 + x, 140 + y);
+		//ctx.fillText(((KE + GPE) / 1000 + 31.937).toFixed(3) + "J energy", innerWidth / 2 + x, 140 + y);
 	}
 }
 setInterval(render, dt * 1000 * bunch);

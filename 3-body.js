@@ -3,6 +3,7 @@ function toExpr(expr) {
 }
 
 class Expr {
+	evalList = {}
 	add(expr) {
 		return Add(this, expr);
 	}
@@ -17,6 +18,10 @@ class Expr {
 	}
 	pow(num) {
 		return Pow(this, num);
+	}
+	smartEval(val) {
+		let k = JSON.stringify(val);
+		return this.evalList[k] === undefined ? this.evalList[k] = this.eval(val) : this.evalList[k];
 	}
 }
 
@@ -227,35 +232,29 @@ const c = document.getElementById("c"), ctx = c.getContext("2d");
 const dt = 0.005;
 const r0 = 200;
 const v0 = 130;
-const k = v0 * v0 / r0 * 30000 * (Math.sqrt(3) + 4);
+const k = v0 * v0 / r0 * 40000 * (Math.sqrt(3) + 4);
 const Methods = {
 	Leapfrog: {
 		color: "#EEEE5F",
-		x: [0, r0 / 2 * Math.sqrt(3), -r0 / 2 * Math.sqrt(3)],
+		x: [0, r0 * Math.sqrt(.75), -r0 * Math.sqrt(.75)],
 		y: [r0, -r0 / 2, -r0 / 2],
 		dx: [-v0, v0 / 2, v0 / 2],
-		dy: [0, v0 * Math.sqrt(3) / 2, -v0 * Math.sqrt(3) / 2],
+		dy: [0, v0 * Math.sqrt(.75), -v0 * Math.sqrt(.75)],
 	},
 	"Third Order": {
 		color: "#3EBCBC",
-		x: [0, r0 / 2 * Math.sqrt(3), -r0 / 2 * Math.sqrt(3)],
+		x: [0, r0 * Math.sqrt(.75), -r0 * Math.sqrt(.75)],
 		y: [r0, -r0 / 2, -r0 / 2],
 		dx: [-v0, v0 / 2, v0 / 2],
-		dy: [0, v0 * Math.sqrt(3) / 2, -v0 * Math.sqrt(3) / 2],
+		dy: [0, v0 * Math.sqrt(.75), -v0 * Math.sqrt(.75)],
 	},
 }
 const X1 = new Var("x1");
-const dX1 = X1.dt();
 const Y1 = new Var("y1");
-const dY1 = X1.dt();
 const X2 = new Var("x2");
-const dX2 = X2.dt();
 const Y2 = new Var("y2");
-const dY2 = X2.dt();
 const X3 = new Var("x3");
-const dX3 = X2.dt();
 const Y3 = new Var("y3");
-const dY3 = X2.dt();
 
 const X12 = X1.sub(X2);
 const Y12 = Y1.sub(Y2);
@@ -269,40 +268,52 @@ const F31 = Mul(k, X31.mul(X31).add(Y31.mul(Y31)).pow(-1.5));
 const d2X1 = F31.mul(X31).sub(F12.mul(X12));
 const d3X1 = d2X1.dt();
 const d4X1 = d3X1.dt();
+const d5X1 = d4X1.dt();
+const d6X1 = d5X1.dt();
 const d2X2 = F12.mul(X12).sub(F23.mul(X23));
 const d3X2 = d2X2.dt();
 const d4X2 = d3X2.dt();
+const d5X2 = d4X2.dt();
+const d6X2 = d5X2.dt();
 const d2X3 = F23.mul(X23).sub(F31.mul(X31));
 const d3X3 = d2X3.dt();
 const d4X3 = d3X3.dt();
+const d5X3 = d4X3.dt();
+const d6X3 = d5X3.dt();
 const d2Y1 = F31.mul(Y31).sub(F12.mul(Y12));
 const d3Y1 = d2Y1.dt();
 const d4Y1 = d3Y1.dt();
+const d5Y1 = d4Y1.dt();
+const d6Y1 = d5Y1.dt();
 const d2Y2 = F12.mul(Y12).sub(F23.mul(Y23));
 const d3Y2 = d2Y2.dt();
 const d4Y2 = d3Y2.dt();
+const d5Y2 = d4Y2.dt();
+const d6Y2 = d5Y2.dt();
 const d2Y3 = F23.mul(Y23).sub(F31.mul(Y31));
 const d3Y3 = d2Y3.dt();
 const d4Y3 = d3Y3.dt();
+const d5Y3 = d4Y3.dt();
+const d6Y3 = d5Y3.dt();
 function d2x([x1, x2, x3], [y1, y2, y3]) {
 	const v = { x1, x2, x3, y1, y2, y3 };
-	return [d2X1.eval(v), d2X2.eval(v), d2X3.eval(v)];
+	return [d2X1.smartEval(v), d2X2.smartEval(v), d2X3.smartEval(v)];
 }
 function d2y([x1, x2, x3], [y1, y2, y3]) {
 	const v = { x1, x2, x3, y1, y2, y3 };
-	return [d2Y1.eval(v), d2Y2.eval(v), d2Y3.eval(v)];
+	return [d2Y1.smartEval(v), d2Y2.smartEval(v), d2Y3.smartEval(v)];
 }
 function d3x([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]) {
 	const [ddx1, ddx2, ddx3] = d2x([x1, x2, x3], [y1, y2, y3]);
 	const [ddy1, ddy2, ddy3] = d2y([x1, x2, x3], [y1, y2, y3]);
 	const v = { x1, x2, x3, y1, y2, y3, dx1, dx2, dx3, dy1, dy2, dy3, ddx1, ddx2, ddx3, ddy1, ddy2, ddy3 };
-	return [d3X1.eval(v), d3X2.eval(v), d3X3.eval(v)];
+	return [d3X1.smartEval(v), d3X2.smartEval(v), d3X3.smartEval(v)];
 }
 function d3y([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]) {
 	const [ddx1, ddx2, ddx3] = d2x([x1, x2, x3], [y1, y2, y3]);
 	const [ddy1, ddy2, ddy3] = d2y([x1, x2, x3], [y1, y2, y3]);
 	const v = { x1, x2, x3, y1, y2, y3, dx1, dx2, dx3, dy1, dy2, dy3, ddx1, ddx2, ddx3, ddy1, ddy2, ddy3 };
-	return [d3Y1.eval(v), d3Y2.eval(v), d3Y3.eval(v)];
+	return [d3Y1.smartEval(v), d3Y2.smartEval(v), d3Y3.smartEval(v)];
 }
 function d4x([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]) {
 	const [ddx1, ddx2, ddx3] = d2x([x1, x2, x3], [y1, y2, y3]);
@@ -310,7 +321,7 @@ function d4x([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]) {
 	const [dddx1, dddx2, dddx3] = d3x([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
 	const [dddy1, dddy2, dddy3] = d3y([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
 	const v = { x1, x2, x3, y1, y2, y3, dx1, dx2, dx3, dy1, dy2, dy3, ddx1, ddx2, ddx3, ddy1, ddy2, ddy3, dddx1, dddx2, dddx3, dddy1, dddy2, dddy3 };
-	return [d4X1.eval(v), d4X2.eval(v), d4X3.eval(v)];
+	return [d4X1.smartEval(v), d4X2.smartEval(v), d4X3.smartEval(v)];
 }
 function d4y([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]) {
 	const [ddx1, ddx2, ddx3] = d2x([x1, x2, x3], [y1, y2, y3]);
@@ -318,7 +329,55 @@ function d4y([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]) {
 	const [dddx1, dddx2, dddx3] = d3x([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
 	const [dddy1, dddy2, dddy3] = d3y([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
 	const v = { x1, x2, x3, y1, y2, y3, dx1, dx2, dx3, dy1, dy2, dy3, ddx1, ddx2, ddx3, ddy1, ddy2, ddy3, dddx1, dddx2, dddx3, dddy1, dddy2, dddy3 };
-	return [d4Y1.eval(v), d4Y2.eval(v), d4Y3.eval(v)];
+	return [d4Y1.smartEval(v), d4Y2.smartEval(v), d4Y3.smartEval(v)];
+}
+function d5x([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]) {
+	const [ddx1, ddx2, ddx3] = d2x([x1, x2, x3], [y1, y2, y3]);
+	const [ddy1, ddy2, ddy3] = d2y([x1, x2, x3], [y1, y2, y3]);
+	const [dddx1, dddx2, dddx3] = d3x([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const [dddy1, dddy2, dddy3] = d3y([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const [ddddx1, ddddx2, ddddx3] = d4x([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const [ddddy1, ddddy2, ddddy3] = d4y([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const v = { x1, x2, x3, y1, y2, y3, dx1, dx2, dx3, dy1, dy2, dy3, ddx1, ddx2, ddx3, ddy1, ddy2, ddy3, dddx1, dddx2, dddx3, dddy1, dddy2, dddy3,
+	ddddx1, ddddx2, ddddx3, ddddy1, ddddy2, ddddy3 };
+	return [d5X1.smartEval(v), d5X2.smartEval(v), d5X3.smartEval(v)];
+}
+function d5y([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]) {
+	const [ddx1, ddx2, ddx3] = d2x([x1, x2, x3], [y1, y2, y3]);
+	const [ddy1, ddy2, ddy3] = d2y([x1, x2, x3], [y1, y2, y3]);
+	const [dddx1, dddx2, dddx3] = d3x([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const [dddy1, dddy2, dddy3] = d3y([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const [ddddx1, ddddx2, ddddx3] = d4x([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const [ddddy1, ddddy2, ddddy3] = d4y([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const v = { x1, x2, x3, y1, y2, y3, dx1, dx2, dx3, dy1, dy2, dy3, ddx1, ddx2, ddx3, ddy1, ddy2, ddy3, dddx1, dddx2, dddx3, dddy1, dddy2, dddy3,
+	ddddx1, ddddx2, ddddx3, ddddy1, ddddy2, ddddy3 };
+	return [d5Y1.smartEval(v), d5Y2.smartEval(v), d5Y3.smartEval(v)];
+}
+function d6x([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]) {
+	const [ddx1, ddx2, ddx3] = d2x([x1, x2, x3], [y1, y2, y3]);
+	const [ddy1, ddy2, ddy3] = d2y([x1, x2, x3], [y1, y2, y3]);
+	const [dddx1, dddx2, dddx3] = d3x([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const [dddy1, dddy2, dddy3] = d3y([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const [ddddx1, ddddx2, ddddx3] = d4x([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const [ddddy1, ddddy2, ddddy3] = d4y([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const [dddddx1, dddddx2, dddddx3] = d5x([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const [dddddy1, dddddy2, dddddy3] = d5y([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const v = { x1, x2, x3, y1, y2, y3, dx1, dx2, dx3, dy1, dy2, dy3, ddx1, ddx2, ddx3, ddy1, ddy2, ddy3, dddx1, dddx2, dddx3, dddy1, dddy2, dddy3,
+	ddddx1, ddddx2, ddddx3, ddddy1, ddddy2, ddddy3, dddddx1, dddddx2, dddddx3, dddddy1, dddddy2, dddddy3 };
+	return [d6X1.smartEval(v), d6X2.smartEval(v), d6X3.smartEval(v)];
+}
+function d6y([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]) {
+	const [ddx1, ddx2, ddx3] = d2x([x1, x2, x3], [y1, y2, y3]);
+	const [ddy1, ddy2, ddy3] = d2y([x1, x2, x3], [y1, y2, y3]);
+	const [dddx1, dddx2, dddx3] = d3x([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const [dddy1, dddy2, dddy3] = d3y([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const [ddddx1, ddddx2, ddddx3] = d4x([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const [ddddy1, ddddy2, ddddy3] = d4y([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const [dddddx1, dddddx2, dddddx3] = d5x([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const [dddddy1, dddddy2, dddddy3] = d5y([x1, x2, x3], [y1, y2, y3], [dx1, dx2, dx3], [dy1, dy2, dy3]);
+	const v = { x1, x2, x3, y1, y2, y3, dx1, dx2, dx3, dy1, dy2, dy3, ddx1, ddx2, ddx3, ddy1, ddy2, ddy3, dddx1, dddx2, dddx3, dddy1, dddy2, dddy3,
+	ddddx1, ddddx2, ddddx3, ddddy1, ddddy2, ddddy3, dddddx1, dddddx2, dddddx3, dddddy1, dddddy2, dddddy3 };
+	return [d6Y1.smartEval(v), d6Y2.smartEval(v), d6Y3.smartEval(v)];
 }
 
 
@@ -352,21 +411,19 @@ function calculate() {
 	dy = [...T.dy];
 	ax = d2x(x, y, dx, dy);
 	ay = d2y(x, y, dx, dy);
-	jx = d3x(x, y, dx, dy);
-	jy = d3y(x, y, dx, dy);
-	sx = d4x(x, y, dx, dy);
-	sy = d4y(x, y, dx, dy);
+	let jx = d3x(x, y, dx, dy);
+	let jy = d3y(x, y, dx, dy);
+	let sx = d4x(x, y, dx, dy);
+	let sy = d4y(x, y, dx, dy);
+	let x5 = d5x(x, y, dx, dy);
+	let y5 = d5y(x, y, dx, dy);
+	let x6 = d6x(x, y, dx, dy);
+	let y6 = d6y(x, y, dx, dy);
 	for (let i = 0; i < 3; i++) {
-		T.x[i] += dt * (dx[i] + dt * 0.5 * (ax[i] + dt / 3 * (jx[i])));
-		T.y[i] += dt * (dy[i] + dt * 0.5 * (ay[i] + dt / 3 * (jy[i])));
-	}
-	for (let i = 0; i < 8; i++) {
-		let newSx = d4x(T.x, T.y, T.dx, T.dy);
-		let newSy = d4y(T.x, T.y, T.dx, T.dy);
-		for (let i = 0; i < 3; i++) {
-			T.dx[i] = dx[i] + dt * (ax[i] + dt * 0.5 * (jx[i] + (sx[i] + newSx[i]) * dt / 6));
-			T.dy[i] = dy[i] + dt * (ay[i] + dt * 0.5 * (jy[i] + (sy[i] + newSy[i]) * dt / 6));
-		}
+		T.x[i] += dt * (dx[i] + dt * .5 * (ax[i] + dt / 3 * (jx[i] + dt * .25 * (sx[i] + dt * .2 * (x5[i] + dt / 6 * x6[i])))));
+		T.y[i] += dt * (dy[i] + dt * 0.5 * (ay[i] + dt / 3 * (jy[i] + dt * .25 * (sy[i] + dt * .2 * (y5[i] + dt / 6 * y6[i])))));
+		T.dx[i] += dt * (ax[i] + dt * 0.5 * (jx[i] + dt / 3 * (sx[i] + dt * .25 * (x5[i] + dt * .2 * x6[i]))));
+		T.dy[i] += dt * (ay[i] + dt * 0.5 * (jy[i] + dt / 3 * (sy[i] + dt * .25 * (y5[i] + dt * .2 * y6[i]))));
 	}
 	//Methods["Third Order"].y[1] += dt * (d2y(oldCT) + dt * 0.5 * (d3y(Methods["Third Order"].y[1]) + d2y(d2y(oldCT + Methods["Third Order"].y[0])) * dt / 6));
 }

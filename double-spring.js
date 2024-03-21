@@ -347,18 +347,14 @@ function calculate() {
 	jy = d3y(x, y, dx, dy);
 	sx = d4x(x, y, dx, dy);
 	sy = d4y(x, y, dx, dy);
-	T.x[0] += dt * (dx[0] + dt * 0.5 * (ax[0] + dt / 3 * (jx[0])));
-	T.x[1] += dt * (dx[1] + dt * 0.5 * (ax[1] + dt / 3 * (jx[1])));
-	T.y[0] += dt * (dy[0] + dt * 0.5 * (ay[0] + dt / 3 * (jy[0])));
-	T.y[1] += dt * (dy[1] + dt * 0.5 * (ay[1] + dt / 3 * (jy[1])));
-	for (let i = 0; i < 8; i++) {
-		let newSx = d4x(T.x, T.y, T.dx, T.dy);
-		let newSy = d4y(T.x, T.y, T.dx, T.dy);
-		T.dx[0] = dx[0] + dt * (ax[0] + dt * 0.5 * (jx[0] + (sx[0] + newSx[0]) * dt / 6));
-		T.dx[1] = dx[1] + dt * (ax[1] + dt * 0.5 * (jx[1] + (sx[1] + newSx[1]) * dt / 6));
-		T.dy[0] = dy[0] + dt * (ay[0] + dt * 0.5 * (jy[0] + (sy[0] + newSy[0]) * dt / 6));
-		T.dy[1] = dy[1] + dt * (ay[1] + dt * 0.5 * (jy[1] + (sy[1] + newSy[1]) * dt / 6));
-	}
+	T.x[0] += dt * (dx[0] + dt * 0.5 * (ax[0] + dt / 3 * (jx[0] + dt * 0.25 * sx[0])));
+	T.x[1] += dt * (dx[1] + dt * 0.5 * (ax[1] + dt / 3 * (jx[1] + dt * 0.25 * sx[1])));
+	T.y[0] += dt * (dy[0] + dt * 0.5 * (ay[0] + dt / 3 * (jy[0] + dt * 0.25 * sx[0])));
+	T.y[1] += dt * (dy[1] + dt * 0.5 * (ay[1] + dt / 3 * (jy[1] + dt * 0.25 * sx[1])));
+	T.dx[0] = dx[0] + dt * (ax[0] + dt * 0.5 * (jx[0] + (sx[0]) * dt / 3));
+	T.dx[1] = dx[1] + dt * (ax[1] + dt * 0.5 * (jx[1] + (sx[1]) * dt / 3));
+	T.dy[0] = dy[0] + dt * (ay[0] + dt * 0.5 * (jy[0] + (sy[0]) * dt / 3));
+	T.dy[1] = dy[1] + dt * (ay[1] + dt * 0.5 * (jy[1] + (sy[1]) * dt / 3));
 	//Methods["Third Order"].y[1] += dt * (d2y(oldCT) + dt * 0.5 * (d3y(Methods["Third Order"].y[1]) + d2y(d2y(oldCT + Methods["Third Order"].y[0])) * dt / 6));
 }
 const bunch = 4;
