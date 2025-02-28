@@ -1,0 +1,27 @@
+body {
+	margin: 0;
+	background-color:#4b425f;
+	color: white;
+	overflow: hidden;
+	font: 20px Arial;
+}
+
+a {
+	color: white;
+}
+
+#pausebutton {
+	position: absolute;
+	cursor: pointer;
+	top: 20px;
+	left: 20px;
+	width: 50px;
+}
+
+#ffbutton {
+	position: absolute;
+	cursor: pointer;
+	top: 90px;
+	left: 20px;
+	width: 50px;
+}
